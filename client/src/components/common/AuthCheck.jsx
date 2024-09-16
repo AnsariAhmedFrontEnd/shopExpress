@@ -44,7 +44,7 @@ const AuthCheck = ({ isAuthenticated, user, children }) => {
     user?.role === "admin" &&
     location.pathname.includes("/shop")
   ) {
-    return <Navigate to="/admin/dashboard" replace />;
+    return <Navigate to="/unauth-page" replace />;
   }
 
   return <div>{children}</div>;
