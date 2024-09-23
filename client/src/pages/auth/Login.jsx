@@ -27,13 +27,14 @@ const Login = () => {
         "http://localhost:5000/api/auth/login",
         formData,
         {
+          withCredentials: true,
+        },
+        {
           headers: {
             "Content-Type": "application/json",
           },
         },
-        {
-          withCredentials: true,
-        }
+        
       );
       if (response?.data?.success) {
         dispatch(setUser(response.data.user));
