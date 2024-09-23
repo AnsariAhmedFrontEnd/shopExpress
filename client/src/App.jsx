@@ -19,6 +19,7 @@ import UnauthPage from "./pages/unauth-page/UnauthPage";
 import { useSelector, useDispatch } from "react-redux";
 import axios from "axios";
 import { logout, setUser } from "./store/auth-slice";
+import { toast } from "react-toastify";
 
 const App = () => {
   const { isAuthenticated, user, isLoading } = useSelector(
@@ -45,7 +46,7 @@ const App = () => {
         dispatch(logout());
       }
     } catch (error) {
-      console.log(error);
+      toast.error(error)
       dispatch(logout());
     }
   };

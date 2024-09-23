@@ -27,23 +27,29 @@ const Login = () => {
         "http://localhost:5000/api/auth/login",
         formData,
         {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        },
+        {
           withCredentials: true,
         }
       );
       if (response?.data?.success) {
         dispatch(setUser(response.data.user));
         toast.success(response?.data?.message);
-
       } else {
         toast.error(response?.data?.message);
       }
     } catch (error) {
+      console.log(error)
       if (
         error.response &&
         error.response.data &&
         error.response.data.message
       ) {
         toast.error(error.response.data.message);
+        return
       } else {
         toast.error("An unexpected error occurred");
       }

@@ -1,27 +1,18 @@
 import React, { useState, useEffect } from "react";
-import UploadImage from "../../components/admin-view/ImageUpload";
+import { setProducts } from "@/store/auth-slice";
 import axios from "axios";
+import { useDispatch } from "react-redux";
+// import UploadImage from "../admin-view/ImageUpload";
 import { toast } from "react-toastify";
-import { setProducts } from "../../store/auth-slice";
-import { useDispatch, useSelector } from "react-redux";
-import ProductList from "../../components/admin-view/ProductsLIst";
 
-const Products = () => {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  //States for Upload Image component
-  const [imageFile, setImageFile] = useState(null);
-  const [uploadedImageUrl, setUploadedImageUrl] = useState("");
-  const [imageLoding, setImageLoading] = useState(false);
-  const dispatch = useDispatch();
-  const { products } = useSelector((state) => state.auth);
-
-  //States for form input
+const EditProductForm = ({ product, isEditFormOpen, setIsEditFormOpen }) => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [category, setCategory] = useState("");
   const [brand, setBrand] = useState("");
   const [price, setPrice] = useState("");
   const [totalStock, setTotalStock] = useState("");
+  const dispatch = useDispatch();
 
   //Fetch all products
   const fetchAllProducts = async () => {
@@ -33,10 +24,10 @@ const Products = () => {
   };
 
   //Add Products
-  const addProductsHandler = async (event) => {
+  const updateProductHandler = async (event) => {
     event.preventDefault();
-    const newProduct = {
-      image: uploadedImageUrl,
+    const updatedProduct = {
+      //   image: uploadedImageUrl,
       title,
       description,
       category,
@@ -44,12 +35,10 @@ const Products = () => {
       price,
       totalStock,
     };
-
-    console.log(newProduct)
     try {
-      const response = await axios.post(
-        "http://localhost:5000/api/admin/products/add",
-        newProduct,
+      const response = await axios.put(
+        `http://localhost:5000/api/admin/products/edit/${product._id}`,
+        updatedProduct,
         {
           headers: {
             "Content-Type": "application/json",
@@ -60,14 +49,13 @@ const Products = () => {
 
       console.log(response);
       if (response.data?.success) {
-        setImageFile(null);
         setTitle("");
         setDescription("");
         setCategory("");
         setBrand("");
         setPrice("");
         setTotalStock("");
-        setIsSidebarOpen(false);
+        setIsEditFormOpen(false);
         fetchAllProducts();
         toast.success(response.data.message);
       }
@@ -77,59 +65,47 @@ const Products = () => {
     }
   };
 
+  // Use useEffect to set the initial values from the product prop when the component mounts
   useEffect(() => {
-    fetchAllProducts();
-  }, []);
+    if (product) {
+      setTitle(product.title);
+      setDescription(product.description);
+      setCategory(product.category);
+      setBrand(product.brand);
+      setPrice(product.price);
+      setTotalStock(product.totalStock);
+    }
+  }, [product]);
 
   return (
     <div>
-      {/* Trigger button */}
-      <button
-        onClick={() => setIsSidebarOpen(true)}
-        className="bg-black text-white px-4 py-2 rounded"
-      >
-        Add New Product
-      </button>
-      {/* Product list */}
-      <div className="flex flex-wrap gap-6 m-4 justify-start">
-        {products.map((product) => (
-          <ProductList
-            key={product._id}
-            product={product}
-            setIsSidebarOpen={setIsSidebarOpen}
-            fetchAllProducts={fetchAllProducts}
-          />
-        ))}
-      </div>
-
-      {/* Sidebar */}
-      {isSidebarOpen && (
+      {isEditFormOpen && (
         <>
           {/* Overlay to dim the background */}
           <div
             className="fixed inset-0 bg-black opacity-50 transition-opacity duration-300"
-            onClick={() => setIsSidebarOpen(false)}
+            onClick={() => setIsEditFormOpen(false)}
           ></div>
 
-          {/* Sidebar content */}
-          <div className="fixed top-0 right-0 w-full md:w-96 p-6 bg-white shadow-lg transition-transform duration-300 transform translate-x-0 overflow-y-auto h-full">
+          {/* Form content */}
+          <div className="fixed top-0 right-0 w-50 md:w-96 p-6 bg-white shadow-lg transition-transform duration-300 transform translate-x-0 overflow-y-auto h-full">
             <button
-              onClick={() => setIsSidebarOpen(false)}
+              onClick={() => setIsEditFormOpen(false)}
               className="absolute top-4 right-4 text-gray-500 text-xl"
             >
               &times;
             </button>
-            <h2 className="text-xl font-bold mb-4">Add New Product</h2>
-            <form className="space-y-4" onSubmit={addProductsHandler}>
+            <h2 className="text-xl font-bold mb-4">Edit Product</h2>
+            <form className="space-y-4" onSubmit={updateProductHandler}>
               {/* Image Upload */}
-              <UploadImage
+              {/* <UploadImage
                 imageFile={imageFile}
                 setImageFile={setImageFile}
                 uploadedImageUrl={uploadedImageUrl}
                 setUploadedImageUrl={setUploadedImageUrl}
                 imageLoding={imageLoding}
                 setImageLoading={setImageLoading}
-              />
+              /> */}
               {/* Title */}
               <div>
                 <label
@@ -143,7 +119,7 @@ const Products = () => {
                   type="text"
                   placeholder="Enter product title"
                   className="w-full p-2 border border-gray-300 rounded-lg"
-                  value={title}
+                  value={title} // Use local state value
                   onChange={(e) => {
                     setTitle(e.target.value);
                   }}
@@ -162,7 +138,7 @@ const Products = () => {
                   id="description"
                   placeholder="Enter product description"
                   className="w-full p-2 border border-gray-300 rounded-md"
-                  value={description}
+                  value={description} // Use local state value
                   onChange={(e) => {
                     setDescription(e.target.value);
                   }}
@@ -180,7 +156,7 @@ const Products = () => {
                 <select
                   id="category"
                   className="w-full p-2 border border-gray-300 rounded-md"
-                  value={category}
+                  value={category} // Use local state value
                   onChange={(e) => {
                     setCategory(e.target.value);
                   }}
@@ -205,7 +181,7 @@ const Products = () => {
                 <select
                   id="brand"
                   className="w-full p-2 border border-gray-300 rounded-md"
-                  value={brand}
+                  value={brand} // Use local state value
                   onChange={(e) => {
                     setBrand(e.target.value);
                   }}
@@ -232,7 +208,7 @@ const Products = () => {
                   type="number"
                   placeholder="Enter product price"
                   className="w-full p-2 border border-gray-300 rounded-md"
-                  value={price}
+                  value={price} // Use local state value
                   onChange={(e) => {
                     setPrice(e.target.value);
                   }}
@@ -252,19 +228,19 @@ const Products = () => {
                   type="number"
                   placeholder="Enter total stock"
                   className="w-full p-2 border border-gray-300 rounded-md"
-                  value={totalStock}
+                  value={totalStock} // Use local state value
                   onChange={(e) => {
                     setTotalStock(e.target.value);
                   }}
                 />
               </div>
 
-              {/* Add Button */}
+              {/* Update Button */}
               <button
                 type="submit"
                 className="w-full bg-black text-white py-2 rounded-md"
               >
-                Add Product
+                Update Product
               </button>
             </form>
           </div>
@@ -274,4 +250,4 @@ const Products = () => {
   );
 };
 
-export default Products;
+export default EditProductForm;

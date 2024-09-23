@@ -23,6 +23,11 @@ const Signup = () => {
         "http://localhost:5000/api/auth/signup",
         formData,
         {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        },
+        {
           withCredentials: true,
         }
       );
